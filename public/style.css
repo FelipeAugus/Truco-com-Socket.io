@@ -1,0 +1,39 @@
+*{ margin: auto; padding: 0px;}
+
+#mesa{
+    margin-top: 75px;
+    background-color: darkgreen;
+    width: 400px;
+    height: 500px;
+    display: flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: center
+}
+
+#mao ul {
+    text-align: center;
+    padding:0px;
+    margin-top:55px;
+    list-style:none;
+}
+
+#mao ul li { 
+    margin: 5px;
+    margin-top: 50px;
+    padding: 50px;
+    background-color:#f01b1b;
+    display: inline; 
+}
+
+#rival, #minha, #pontos{
+    color: black;
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background-color:#4f3d7a;
+}
+
+#pontos{display: flex;flex-direction:column;}
+
+#ptMeu, #ptRiv{ border:solid 1px;}

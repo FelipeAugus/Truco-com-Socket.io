@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truco</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.0/socket.io.js" integrity="sha512-+l9L4lMTFNy3dEglQpprf7jQBhQsQ3/WvOnjaN/+/L4i0jOstgScV0q2TjfvRF4V+ZePMDuZYIQtg5T4MKr+MQ==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <section id = "log" style="display: flex; margin-top: 100px;">
+        <form id="login">
+            <input type="text" name="nick" placeholder="Digite seu nickname" required>
+            
+            <button type="submit">JOGAR</button>
+        </form>
+    </section>
+    
+    <section id = "game" style="display: none;">
+        <div id="mesa">
+            <div id="rival"></div>
+            <div id="pontos" style="float: right;">
+                <div id="ptRiv">Rival: <a>0</a> PTS</div>
+                <div id="ptMeu">Eu: <a>0</a> PTS</div>
+            </div>
+            <div id="minha"></div>
+        </div>
+
+        <div id="mao">
+            <ul>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+        </div>
+    </section>
+    
+    <script>
+        const socket = io('http://localhost:3000'); // io vem da CDN
+
+        // LOGIN
+        $("#login").submit(function(e){
+            e.preventDefault();
+            let usu = $("input[name=nick]").val();
+            socket.emit('username', usu);
+        });
+        socket.on("userOk", usu =>{             
+            $("section:eq(0)").replaceWith($("section:eq(1)").fadeIn());
+            socket.emit('newGame', usu);
+        });
+        socket.on("userNok", ()=>{
+            alert("Nome de usuário indisponivel no momento.");
+        });
+
+        // Imprimir mesa e mão
+        socket.on("cards", J =>{
+            for(let x = 0; x<3; x++){
+                $(`li:eq(${x})`).html(`<a onclick="atk(${x})">${J.mao[x].num} ${J.mao[x].nipe}</a>`);
+
+            }
+        });
+        // Jogar carta
+        function atk(x) {
+            socket.emit("cardAtk", x);
+            ////////////////// RESETAR MESA
+            /// Provavel por estar denro da func.. gera loop e faz a coisa 3 vezes kkj
+            
+        }
+        socket.on("AtkAtiv", c =>{
+            if(c == null) return;
+            else{
+                if(($(`#minha`)).text() != ''){
+                    $(`#rival`).html('');
+                }
+                $(`li:eq(${c[0]})`).html('');
+                $(`#minha`).html(`${c[1].num} ${c[1].nipe}`);
+            }
+        });
+        socket.on("AtkPasv", c =>{
+            if(($(`#rival`)).text() != ''){
+                $(`#minha`).html('');
+            }
+            $(`#rival`).html(`${c.num} ${c.nipe}`);
+        }); 
+        // Calcular vitória 
+        socket.on("win", ()=>{
+            $(`#ptMeu a`).html(Number($(`#ptMeu a`).text())+1);
+        });
+        socket.on("los", ()=>{
+            $(`#ptRiv a`).html(Number($(`#ptRiv a`).text())+1);
+        });
+    
+    
+    </script>
+</body>
+</html>
