@@ -27,7 +27,7 @@ class Baralho{
 
         for( i = 10; i>=4; i--){ // inserir as cartas 10 = K, 9 = J, 8 = Q, 7, 6, 5 e 4;
             for(np = 1; np<=4; np++){
-                if((i!=7 || np!=2) && (i!=7 || np!=4) && (i!=4 || np!=1)){ //já inseriu as outras manilhas então não reenserir
+                if((i!=7 || np!=2) && (i!=7 || np!=4) && (i!=4 || np!=3)){ //já inseriu as outras manilhas então não reenserir
                     cartas.push(new Carta(o, np, i, c));
                     c++;
                 }

@@ -27,6 +27,7 @@ class Game{
     start(){
         this.partida = !this.partida;
         this.rodada = 0;
+        this.rodadaValor = 2;
 
         this.deck = new Baralho();
         this.deck.distribui(this.p1);
@@ -37,6 +38,13 @@ class Game{
 
         delete(this.deck);
         this.vez = this.partida;
+    }
+
+    end(nick, usuarios){
+        nick.delete(this.p1.id);
+        nick.delete(this.p2.id);
+        usuarios.delete(this.p1.id);
+        usuarios.delete(this.p2.id);
     }
 }
 
