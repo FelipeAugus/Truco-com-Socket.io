@@ -25,7 +25,7 @@
     background-color:#f01b1b;
     display: inline; 
 }
-
+#rival, #minha {font-size: 30px;}
 #rival, #minha, #pontos{
     color: black;
     position: relative;

@@ -4,6 +4,9 @@ class Jogador{
         this.nick = name;
         this.gameCod = null;
         this.mao = [null, null, null];
+        this.ptMesa = null;
+        this.pts = 0;
+
     }
 
     recebe(card){

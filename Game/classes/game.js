@@ -9,6 +9,9 @@ class Game{
         this.mesa = []
         this.vez = null;
 
+        this.partida = false;
+        this.rodada = null;
+
         P1.gameCod = cod;
     }
 
@@ -22,11 +25,18 @@ class Game{
     }
 
     start(){
+        this.partida = !this.partida;
+        this.rodada = 0;
+
         this.deck = new Baralho();
         this.deck.distribui(this.p1);
         this.deck.distribui(this.p2);
+        
+        this.p1.ptMesa = 0;
+        this.p2.ptMesa = 0;
+
         delete(this.deck);
-        this.vez = true;
+        this.vez = this.partida;
     }
 }
 

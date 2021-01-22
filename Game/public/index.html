@@ -53,20 +53,18 @@
             alert("Nome de usuário indisponivel no momento.");
         });
 
-        // Imprimir mesa e mão
+        // Imprimir mão
         socket.on("cards", J =>{
             for(let x = 0; x<3; x++){
-                $(`li:eq(${x})`).html(`<a onclick="atk(${x})">${J.mao[x].num} ${J.mao[x].nipe}</a>`);
+                let nipe = viraNipe(J.mao[x].nipe);
+                $(`li:eq(${x})`).html(`<a onclick="atk(${x})">${J.mao[x].num} ${nipe}</a>`);
 
             }
         });
+        
         // Jogar carta
-        function atk(x) {
-            socket.emit("cardAtk", x);
-            ////////////////// RESETAR MESA
-            /// Provavel por estar denro da func.. gera loop e faz a coisa 3 vezes kkj
-            
-        }
+        function atk(x) { socket.emit("cardAtk", x);}
+        
         socket.on("AtkAtiv", c =>{
             if(c == null) return;
             else{
@@ -74,14 +72,16 @@
                     $(`#rival`).html('');
                 }
                 $(`li:eq(${c[0]})`).html('');
-                $(`#minha`).html(`${c[1].num} ${c[1].nipe}`);
+                let nipe = viraNipe(c[1].nipe);
+                $(`#minha`).html(`${c[1].num} ${nipe}`);
             }
         });
         socket.on("AtkPasv", c =>{
             if(($(`#rival`)).text() != ''){
                 $(`#minha`).html('');
             }
-            $(`#rival`).html(`${c.num} ${c.nipe}`);
+            let nipe = viraNipe(c.nipe);
+            $(`#rival`).html(`${c.num} ${nipe}`);
         }); 
         // Calcular vitória 
         socket.on("win", ()=>{
@@ -91,7 +91,24 @@
             $(`#ptRiv a`).html(Number($(`#ptRiv a`).text())+1);
         });
     
-    
+        function viraNipe(n) {
+            let nipe;
+            switch (n) {
+                case 1:
+                    nipe = '♠';
+                    break;
+                case 2:
+                    nipe = '❤';
+                    break;
+                case 3:
+                    nipe = '♣';
+                    break;
+                case 4:
+                    nipe = '♦';
+                    break;
+            }
+            return nipe;
+        }
     </script>
 </body>
 </html>

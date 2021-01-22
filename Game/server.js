@@ -90,8 +90,11 @@ io.on('connection', socket => {// Identifica conexões
         socket.emit("AtkAtiv", [x, J1.mao[x]]);
         io.to(J2.id).emit("AtkPasv", J1.mao[x]);
 
+
+        //Calcula vitória da mesa
         if(G.mesa.length == 2){
-            
+            G.rodada++;
+
             let m1 = G.mesa[0]; //[id, carta]
             let m2 = G.mesa[1];
             
@@ -101,37 +104,67 @@ io.on('connection', socket => {// Identifica conexões
             let win;
 
             if(c1.ordem < c2.ordem){
-                io.to(m1[0]).emit("win");
-                io.to(m2[0]).emit("los");
-                
                 win = true;
             }else if(c1.ordem > c2.ordem){
-                io.to(m1[0]).emit("los");
-                io.to(m2[0]).emit("win");
-               
-                win = false;  
+                win = false; 
             }else{
-                io.to(m1[0]).emit("win");
-                io.to(m2[0]).emit("los");
-                io.to(m2[0]).emit("win");
-                io.to(m2[0]).emit("los");
                 G.setvez();
+                return;
             }
 
             if(win){
-                if(m1[0] == G.p1.id) G.vez = true;
-                else G.vez = false;
-
+                if(m1[0] == G.p1.id){
+                    G.p1.ptMesa++;
+                    G.vez = true;
+                }else{
+                    G.p2.ptMesa++;
+                    G.vez = false;
+                }
             }else{
-                if(m1[0] == G.p1.id) G.vez = false;
-                else G.vez = true;
-
+                if(m1[0] == G.p1.id){
+                    G.p2.ptMesa++;
+                    G.vez = false;                   
+                }else{
+                    G.p1.ptMesa++;
+                    G.vez = true;       
+                }
             }
-
             G.mesa = [];
+            console.log(`J1: ${G.p1.ptMesa}, J2: ${G.p2.ptMesa}`);
+
         }else{
             G.setvez();
         }
+
+        if(G.rodada == 3){
+            
+            if(G.p1.ptMesa > G.p2.ptMesa){
+                io.to(G.p1.id).emit("win");
+                io.to(G.p2.id).emit("los");
+                G.p1.pts++;
+
+            }else if(G.p1.ptMesa < G.p2.ptMesa){
+                io.to(G.p2.id).emit("win");
+                io.to(G.p1.id).emit("los");
+                G.p2.pts++;
+
+            }else{
+                io.to(G.p1.id).emit("win");
+                io.to(G.p2.id).emit("los");
+
+                io.to(G.p2.id).emit("win");
+                io.to(G.p1.id).emit("los");
+                G.p1.pts++;
+                G.p2.pts++;
+
+            }
+
+            G.start();
+            io.to(G.p1.id).emit("cards", G.p1);
+            io.to(G.p2.id).emit("cards", G.p2);
+            console.log(`J1s: ${G.p1.pts}, J2s: ${G.p2.pts}`);
+        }
+        
     });
 
     // Disconect
