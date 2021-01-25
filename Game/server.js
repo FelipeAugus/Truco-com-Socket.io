@@ -33,7 +33,7 @@ let codGame = [0 ,0]; // Codigo do game e se a mesa já está ok
 io.on('connection', socket => {// Identifica conexões
     console.log(`${socket.id} CONECTADO`);
     // LOGIN
-    socket.on('username', usu =>{
+    socket.on("username", usu =>{
         let dup = 0;
 
         dup = [...nick.values()].indexOf(usu); //Se não existe retorna -1;
@@ -48,7 +48,7 @@ io.on('connection', socket => {// Identifica conexões
         }
     });
     // Find game
-    socket.on('newGame', usu =>{
+    socket.on("newGame", usu =>{
         let J = new Jogador(usu, socket.id);
 
         if (codGame[1] == 0){
@@ -69,16 +69,63 @@ io.on('connection', socket => {// Identifica conexões
             socket.emit("cards", J);
         }
     });
+    // TRUCO
+    socket.on("TrucoAtiv", ()=>{
+        const G = games.get(usuarios.get(socket.id));
+        
+        if((G.p1.id == socket.id && G.vez) && !G.p1.truco){
+            io.to(G.p2.id).emit("TrucoPasv");
+            G.p1.truco = true;
+            G.p2.truco = false;
+            G.setvez();
+           
+        }else if ((G.p2.id == socket.id && !G.vez) && !G.p2.truco){
+            io.to(G.p1.id).emit("TrucoPasv"); 
+            G.p1.truco = false;
+            G.p2.truco = true;
+            G.setvez();
+            
+        }else{
+            return;
+        }
 
-    //Jogar carta
+        G.truco = true;
+    });
+    socket.on("Aceitar", ()=>{
+        const G = games.get(usuarios.get(socket.id));
+        
+        G.truco = false;
+        G.rodadaValor*=2;
+        G.setvez();
+    });
+    socket.on("Correr", ()=>{
+        const G = games.get(usuarios.get(socket.id));
+
+        if(G.p1.id == socket.id){
+            G.p2.pts += G.rodadaValor;
+            io.to(G.p1.id).emit("los", G.rodadaValor);
+            io.to(G.p2.id).emit("win", G.rodadaValor);
+        }else if (G.p2.id == socket.id){
+            G.p1.pts += G.rodadaValor;
+            io.to(G.p1.id).emit("win", G.rodadaValor);
+            io.to(G.p2.id).emit("los", G.rodadaValor);
+        }
+        G.p1.truco = false;
+        G.p2.truco = false;
+        G.truco = false;
+
+        win(G);
+    });
+    //Jogar carta e verificar vitória
     socket.on("cardAtk", x =>{
         const G = games.get(usuarios.get(socket.id));
+       
         let J1, J2;
         
-        if(G.p1.id == socket.id && G.vez){
+        if((G.p1.id == socket.id && G.vez) && !G.truco){
             J1 = G.p1;
             J2 = G.p2;
-        }else if (G.p2.id == socket.id && !G.vez){
+        }else if ((G.p2.id == socket.id && !G.vez) && !G.truco){
             J1 = G.p2;
             J2 = G.p1;
         }else{
@@ -89,7 +136,6 @@ io.on('connection', socket => {// Identifica conexões
         G.mesa.push([J1.id, J1.mao[x]]) // Armazena as cartas para o calculo de vencedor
         socket.emit("AtkAtiv", [x, J1.mao[x]]);
         io.to(J2.id).emit("AtkPasv", J1.mao[x]);
-
 
         //Calcula vitória da mesa
         if(G.mesa.length == 2){
@@ -135,7 +181,6 @@ io.on('connection', socket => {// Identifica conexões
         }else{
             G.setvez();
         }
-
         if(G.rodada == 3){
             if(G.p1.ptMesa > G.p2.ptMesa){
                 io.to(G.p1.id).emit("win", G.rodadaValor);
@@ -148,31 +193,45 @@ io.on('connection', socket => {// Identifica conexões
                 G.p2.pts += G.rodadaValor;
 
             }
-
-            if(G.p1.pts >= 12){
-                io.to(G.p1.id).emit("winGame");
-                io.to(G.p2.id).emit("losGame");
-                G.end(usuarios, nick);
-
-            }else if(G.p2.pts >= 12){
-                io.to(G.p1.id).emit("winGame");
-                io.to(G.p2.id).emit("losGame");
-                G.end(usuarios, nick);
-                
-            }else{
-                G.start();
-                io.to(G.p1.id).emit("cards", G.p1);
-                io.to(G.p2.id).emit("cards", G.p2);
-                
-            }
+        
+            win(G);
         }
     });
-
     // Disconect
     socket.on("disconnect", () =>{
         console.log(`${socket.id}[${nick.get(socket.id)}] DESCONECTADO`);
-        nick.delete(socket.id);
+        
+        const G = games.get(usuarios.get(socket.id));
+        if (G == null) return
+
+        if(socket.id == G.p1.id && G.p2 != null){ io.to(G.p2.id).emit("RivalOff"); }
+        else{ io.to(G.p1.id).emit("RivalOff"); }
+
+        if(G.gameCod == codGame[0]){ codGame[1] = 0; }
+        G.end(nick, usuarios, games);
     });
+
+    function win(G){
+        console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
+        
+        if(G.p1.pts >= 12){
+            io.to(G.p1.id).emit("winGame");
+            io.to(G.p2.id).emit("losGame");
+            G.end(usuarios, nick, games);
+            console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
+
+        }else if(G.p2.pts >= 12){
+            io.to(G.p1.id).emit("losGame");
+            io.to(G.p2.id).emit("winGame");
+            G.end(usuarios, nick, games);
+            console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
+
+        }else{
+            G.start();
+            io.to(G.p1.id).emit("cards", G.p1);
+            io.to(G.p2.id).emit("cards", G.p2);
+        }
+    }
 });
 
 server.listen(porta, function(){

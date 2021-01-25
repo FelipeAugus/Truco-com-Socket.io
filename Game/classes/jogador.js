@@ -6,6 +6,7 @@ class Jogador{
         this.mao = [null, null, null];
         this.ptMesa = null;
         this.pts = 0;
+        this.truco = null;
 
     }
 

@@ -5,6 +5,7 @@ class Game{
         this.gameCod = cod;
         this.p1 = P1;
         this.p2 = null;
+        this.truco = null;
         this.deck = null;
         this.mesa = []
         this.vez = null;
@@ -25,6 +26,10 @@ class Game{
     }
 
     start(){
+        this.p1.truco = false;
+        this.p2.truco = false;
+        this.truco = false;
+        
         this.partida = !this.partida;
         this.rodada = 0;
         this.rodadaValor = 2;
@@ -33,18 +38,22 @@ class Game{
         this.deck.distribui(this.p1);
         this.deck.distribui(this.p2);
         
+        this.mesa = []
         this.p1.ptMesa = 0;
         this.p2.ptMesa = 0;
 
         delete(this.deck);
         this.vez = this.partida;
     }
-
-    end(nick, usuarios){
+    
+    end(nick, usuarios, games){
         nick.delete(this.p1.id);
-        nick.delete(this.p2.id);
         usuarios.delete(this.p1.id);
-        usuarios.delete(this.p2.id);
+        if(this.p2 != null){
+            nick.delete(this.p2.id);
+            usuarios.delete(this.p2.id);
+        }
+        games.delete(this.gameCod);        
     }
 }
 

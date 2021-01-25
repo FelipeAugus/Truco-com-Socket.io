@@ -43,7 +43,7 @@ class Baralho{
         const card = [];
         
         for (let i = 0; i < 3; i++) {
-            x = Math.round(Math.random()*this.cartas.length);
+            x = Math.round(Math.random()*(this.cartas.length-1));
             card.push(this.cartas[x]);
 
             this.cartas.splice(this.cartas.indexOf(this.cartas[x]), 1);

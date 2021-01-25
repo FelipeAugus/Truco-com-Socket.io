@@ -34,6 +34,8 @@
                 <li></li>
             </ul>
         </div>
+        </br>
+        <div id="truco"><a onclick="truco()">TRUCO</a></div>
     </section>
     
     <script>
@@ -52,20 +54,16 @@
         socket.on("userNok", ()=>{
             alert("Nome de usuário indisponivel no momento.");
         });
-
         // Imprimir mão
         socket.on("cards", J =>{
             for(let x = 0; x<3; x++){
                 let nipe = viraNipe(J.mao[x].nipe);
                 let num = viraReal(J.mao[x].num);
                 $(`li:eq(${x})`).html(`<a onclick="atk(${x})">${num} ${nipe}</a>`);
-
             }
-        });
-        
+        }); 
         // Jogar carta
         function atk(x) { socket.emit("cardAtk", x);}
-        
         socket.on("AtkAtiv", c =>{
             if(c == null) return;
             else{
@@ -88,20 +86,44 @@
         }); 
         // Calcular vitória 
         socket.on("win", x =>{
+            $(`#minha`).html('');
+            $(`#rival`).html('');
             $(`#ptMeu a`).html(Number($(`#ptMeu a`).text())+x);
         });
         socket.on("los", x =>{
-            $(`#ptRiv a`).html(Number($(`#ptRiv a`).text())+x);
+            $(`#minha`).html('');
+            $(`#rival`).html('');
+            $("#ptRiv a").html(Number($(`#ptRiv a`).text())+x);
         });
         socket.on("winGame", () =>{
             alert("PARABÉNS VOCÊ VENCEU !!!");
-            $("section").load("./index.html");
+            location.reload(true);
         });
         socket.on("losGame", () =>{
             alert("Você perdeu, mais sorte na próxima !!!");
-            $("section").load("./index.html");
+            location.reload(true);
         });
-    
+        // TRUCO -> Pedir / Aceitar
+        function truco() {socket.emit("TrucoAtiv");}
+        socket.on("TrucoPasv", ()=>{
+            $("#truco").html(`SEU OPONENTE TRUCOU: <a onclick="aceitar()">ACEITAR</a> || <a onclick="correr()">CORRER</a>`)
+        });
+        function aceitar(){
+            $("#truco").html(`<a onclick="truco()">TRUCO</a>`);
+            socket.emit("Aceitar");
+        };
+        function correr(){
+            $("#truco").html(`<a onclick="truco()">TRUCO</a>`);
+            socket.emit("Correr");
+        };
+        // Oponente quitou
+        socket.on("RivalOff", ()=>{
+            alert("SEU OPONENTE DESCONECTOU DA PARTIDA!");
+            location.reload();
+            //$("section").load("./index.html");
+        });
+        
+        //FUNÇÕES
         function viraNipe(n) {
             let nipe;
             switch (n) {
@@ -140,6 +162,7 @@
             }
             return num;
         }
+    
     </script>
 </body>
 </html>
