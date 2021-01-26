@@ -73,6 +73,8 @@ io.on('connection', socket => {// Identifica conexões
     socket.on("TrucoAtiv", ()=>{
         const G = games.get(usuarios.get(socket.id));
         
+        if (G.p2 == null) return;
+
         if((G.p1.id == socket.id && G.vez) && !G.p1.truco){
             io.to(G.p2.id).emit("TrucoPasv");
             G.p1.truco = true;
@@ -209,30 +211,28 @@ io.on('connection', socket => {// Identifica conexões
 
         if(G.gameCod == codGame[0]){ codGame[1] = 0; }
         G.end(nick, usuarios, games);
-    });
-
-    function win(G){
-        console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
-        
-        if(G.p1.pts >= 12){
-            io.to(G.p1.id).emit("winGame");
-            io.to(G.p2.id).emit("losGame");
-            G.end(usuarios, nick, games);
-            console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
-
-        }else if(G.p2.pts >= 12){
-            io.to(G.p1.id).emit("losGame");
-            io.to(G.p2.id).emit("winGame");
-            G.end(usuarios, nick, games);
-            console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
-
-        }else{
-            G.start();
-            io.to(G.p1.id).emit("cards", G.p1);
-            io.to(G.p2.id).emit("cards", G.p2);
-        }
-    }
+    });    
 });
+
+function win(G){ 
+    if(G.p1.pts >= 12){
+        io.to(G.p1.id).emit("winGame");
+        io.to(G.p2.id).emit("losGame");
+        G.end(usuarios, nick, games);
+        console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
+
+    }else if(G.p2.pts >= 12){
+        io.to(G.p1.id).emit("losGame");
+        io.to(G.p2.id).emit("winGame");
+        G.end(usuarios, nick, games);
+        console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
+
+    }else{
+        G.start();
+        io.to(G.p1.id).emit("cards", G.p1);
+        io.to(G.p2.id).emit("cards", G.p2);
+    }
+}
 
 server.listen(porta, function(){
     console.log(`Server rodando na porta ${porta}; Para encerrar CTRL+C\n\n`);

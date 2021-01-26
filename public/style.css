@@ -1,10 +1,10 @@
 *{ margin: auto; padding: 0px;}
 
 #mesa{
-    margin-top: 75px;
+    margin-top: 30pt;
     background-color: darkgreen;
-    width: 400px;
-    height: 500px;
+    width: 200pt;
+    height: 300pt;
     display: flex;
     flex-direction:column;
     justify-content: center;
@@ -14,26 +14,26 @@
 #mao ul {
     text-align: center;
     padding:0px;
-    margin-top:55px;
+    margin:55px 0px 55px 0px;
     list-style:none;
 }
 
 #mao ul li { 
     margin: 5px;
-    margin-top: 50px;
-    padding: 50px;
+    padding: 45px;
     background-color:#f01b1b;
-    display: inline; 
+    display: inline;
+     
 }
 #rival, #minha {font-size: 30px;}
 #rival, #minha, #pontos{
     color: black;
-    position: relative;
     width: 100px;
     height: 100px;
     background-color:#4f3d7a;
 }
+#truco{width:320px;background-color: #25ac25; text-align:center;}
 
 #pontos{display: flex;flex-direction:column;}
 
-#ptMeu, #ptRiv{ border:solid 1px;}
+#truco, #ptMeu, #ptRiv{ border:solid 1px;}
