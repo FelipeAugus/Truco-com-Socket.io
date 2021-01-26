@@ -1,4 +1,5 @@
-const porta = 3000;
+const porta = process.env.PORT || 3000;
+const host = process.env.HEROKU_APP_NAME ? `https://${process.env.HEROKU_APP_NAME}.herokuapp.com` : "http://localhost";
 
 const Jogador = require('./classes/jogador.js');
 const Game = require('./classes/game.js');
@@ -28,7 +29,6 @@ const usuarios = new Map; // socket id e codGame
 const games = new Map; // codGame e game;
 
 let codGame = [0 ,0]; // Codigo do game e se a mesa já está ok
-
 
 io.on('connection', socket => {// Identifica conexões
     console.log(`${socket.id} CONECTADO`);
@@ -235,5 +235,9 @@ function win(G){
 }
 
 server.listen(porta, function(){
-    console.log(`Server rodando na porta ${porta}; Para encerrar CTRL+C\n\n`);
-}); 
+    const portaStr = porta === 80 ? '' :  ':' + porta
+
+    if (process.env.HEROKU_APP_NAME) 
+        console.log('Servidor iniciado. Abra o navegador em ' + host);
+    else console.log('Servidor iniciado. Abra o navegador em ' + host + portaStr);
+});
