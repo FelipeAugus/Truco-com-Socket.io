@@ -16,7 +16,7 @@ class Baralho{
 
         for( i = 3; i>0; i--){ //inserir as cartas 3, 2 e 1 = A;
             for(np = 1; np<=4; np++){ // Insere todos os nipes 
-                if(i!=1 || np!=3){ //já inseriu o epada então não reenserir
+                if(i!=1 || np!=1){ //já inseriu o epada então não reenserir
                     cartas.push(new Carta(o, np, i, c));
                     c++;
                 }

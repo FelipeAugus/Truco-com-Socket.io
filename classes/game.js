@@ -11,7 +11,6 @@ class Game{
         this.vez = null;
 
         this.partida = false;
-        this.rodada = null;
 
         P1.gameCod = cod;
     }
@@ -31,7 +30,6 @@ class Game{
         this.truco = false;
         
         this.partida = !this.partida;
-        this.rodada = 0;
         this.rodadaValor = 2;
 
         this.deck = new Baralho();

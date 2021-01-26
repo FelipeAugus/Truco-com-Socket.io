@@ -141,7 +141,6 @@ io.on('connection', socket => {// Identifica conexões
 
         //Calcula vitória da mesa
         if(G.mesa.length == 2){
-            G.rodada++;
 
             let m1 = G.mesa[0]; //[id, carta]
             let m2 = G.mesa[1];
@@ -183,7 +182,7 @@ io.on('connection', socket => {// Identifica conexões
         }else{
             G.setvez();
         }
-        if(G.rodada == 3){
+        if((G.p1.ptMesa >= 2 || G.p2.ptMesa >= 2) && G.p1.ptMesa != G.p2.ptMesa){
             if(G.p1.ptMesa > G.p2.ptMesa){
                 io.to(G.p1.id).emit("win", G.rodadaValor);
                 io.to(G.p2.id).emit("los", G.rodadaValor);
