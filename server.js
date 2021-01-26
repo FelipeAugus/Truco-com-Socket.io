@@ -155,6 +155,8 @@ io.on('connection', socket => {// Identifica conexões
             }else if(c1.ordem > c2.ordem){
                 win = false; 
             }else{
+                G.p1.ptMesa++;
+                G.p2.ptMesa++;
                 G.setvez();
                 G.mesa = [];
                 return;
