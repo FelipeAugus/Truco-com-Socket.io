@@ -9,7 +9,7 @@ class Game{
         this.deck = null;
         this.mesa = []
         this.vez = null;
-
+        this.rodada = null;
         this.partida = false;
 
         P1.gameCod = cod;
@@ -29,6 +29,7 @@ class Game{
         this.p2.truco = false;
         this.truco = false;
         
+        this.rodada = 0;
         this.partida = !this.partida;
         this.rodadaValor = 2;
 

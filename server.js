@@ -141,7 +141,7 @@ io.on('connection', socket => {// Identifica conexões
 
         //Calcula vitória da mesa
         if(G.mesa.length == 2){
-
+            G.rodada++;
             let m1 = G.mesa[0]; //[id, carta]
             let m2 = G.mesa[1];
             
@@ -184,7 +184,7 @@ io.on('connection', socket => {// Identifica conexões
         }else{
             G.setvez();
         }
-        if((G.p1.ptMesa >= 2 || G.p2.ptMesa >= 2) && G.p1.ptMesa != G.p2.ptMesa){
+        if ((G.rodada == 3) || ((G.p1.ptMesa >= 2 || G.p2.ptMesa >= 2) && G.p1.ptMesa != G.p2.ptMesa)){
             if(G.p1.ptMesa > G.p2.ptMesa){
                 io.to(G.p1.id).emit("win", G.rodadaValor);
                 io.to(G.p2.id).emit("los", G.rodadaValor);
@@ -194,10 +194,9 @@ io.on('connection', socket => {// Identifica conexões
                 io.to(G.p2.id).emit("win", G.rodadaValor);
                 io.to(G.p1.id).emit("los", G.rodadaValor);
                 G.p2.pts += G.rodadaValor;
-
+                
             }
-        
-            win(G);
+            win (G);
         }
     });
     // Disconect
@@ -220,13 +219,11 @@ function win(G){
         io.to(G.p1.id).emit("winGame");
         io.to(G.p2.id).emit("losGame");
         G.end(usuarios, nick, games);
-        console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
-
+        
     }else if(G.p2.pts >= 12){
         io.to(G.p1.id).emit("losGame");
         io.to(G.p2.id).emit("winGame");
         G.end(usuarios, nick, games);
-        console.log("G1= ", G.p1.pts, "  G2= ", G.p2.pts);
 
     }else{
         G.start();
