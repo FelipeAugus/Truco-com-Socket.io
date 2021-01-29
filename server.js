@@ -35,6 +35,8 @@ io.on('connection', socket => {// Identifica conexões
     // LOGIN
     socket.on("username", usu =>{
         let dup = 0;
+        
+        usu = usu.trim();
 
         dup = [...nick.values()].indexOf(usu); //Se não existe retorna -1;
 
@@ -74,19 +76,17 @@ io.on('connection', socket => {// Identifica conexões
     socket.on("TrucoAtiv", ()=>{
         const G = games.get(usuarios.get(socket.id));
         
-        if (G.p2 == null) return;
+        if ((G.p2 == null) || (G.p1.pts == 10 || G.p2.pts == 10)) return;
 
         if((G.p1.id == socket.id && G.vez) && !G.p1.truco){
-            io.to(G.p2.id).emit("TrucoPasv");
+            io.to(G.p2.id).emit("TrucoPasv", true);
             G.p1.truco = true;
             G.p2.truco = false;
-            G.setvez();
            
         }else if ((G.p2.id == socket.id && !G.vez) && !G.p2.truco){
-            io.to(G.p1.id).emit("TrucoPasv"); 
+            io.to(G.p1.id).emit("TrucoPasv", true); 
             G.p1.truco = false;
             G.p2.truco = true;
-            G.setvez();
             
         }else{
             return;
@@ -124,7 +124,7 @@ io.on('connection', socket => {// Identifica conexões
 
         G.truco = false;
         G.rodadaValor+=2;
-        G.setvez();
+        console.log("Aceitou: VEZ");
     });
     socket.on("Correr", ()=>{
         const G = games.get(usuarios.get(socket.id));
@@ -144,8 +144,8 @@ io.on('connection', socket => {// Identifica conexões
         G.p1.truco = false;
         G.p2.truco = false;
         G.truco = false;
-
         win(G);
+        vez(G);
     });
     //Jogar carta e verificar vitória
     socket.on("cardAtk", x =>{
@@ -226,6 +226,7 @@ io.on('connection', socket => {// Identifica conexões
             }
             win (G);
         }
+        console.log("VEZ");
         vez(G);
     });
     // Disconect
@@ -258,8 +259,33 @@ function win(G){
 
     }else{
         G.start();
-        io.to(G.p1.id).emit("cards", G.p1);
-        io.to(G.p2.id).emit("cards", G.p2);
+        if(G.p1.pts == 10 && G.p2.pts == 10){
+            let a = new Object();
+            x = {nipe: -1, num: -1}
+            a.mao = [x, x, x]
+
+            io.to(G.p1.id).emit("cards", a);
+            io.to(G.p2.id).emit("cards", a);
+            io.to(G.p1.id).emit("SttTruco", {stt: 57, text: 'Mão de ferro'});
+            io.to(G.p2.id).emit("SttTruco", {stt: 57, text: 'Mão de ferro'});
+
+        }else{ 
+            if(G.p1.pts == 10){
+                G.truco = true;
+                io.to(G.p1.id).emit("SttTruco", {stt: true, text: 'Mão de dez'});
+                io.to(G.p2.id).emit("SttTruco", {stt: true, text: 'Mão de dez'});
+                io.to(G.p1.id).emit("TrucoPasv", false);
+
+            }else if (G.p2.pts == 10){
+                G.truco = true;
+                io.to(G.p1.id).emit("SttTruco", {stt: true, text: 'Mão de dez'});
+                io.to(G.p2.id).emit("SttTruco", {stt: true, text: 'Mão de dez'});
+                io.to(G.p2.id).emit("TrucoPasv", false);
+
+            }
+            io.to(G.p1.id).emit("cards", G.p1);
+            io.to(G.p2.id).emit("cards", G.p2);
+        }
     }
 }
 function vez(G){

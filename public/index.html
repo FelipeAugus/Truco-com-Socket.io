@@ -102,21 +102,18 @@
         function truco() {socket.emit("TrucoAtiv");}
         let s;
         socket.on("SttTruco", t =>{
-            
             if(t.text!=null) $(`#sttTruco`).html(t.text);
-            if(t.stt){
+            if(t.stt && t.stt!=57){
                 s = setInterval(function(){$(`#sttTruco`).toggle();}, 1000);
             }else{
                 clearInterval(s);
                 $(`#sttTruco`).html("<br>");
-            }
-            
-
-            
-            
+            }  
+            if(t.stt == 57) $(`#sttTruco`).html(t.text);
         });
-        socket.on("TrucoPasv", ()=>{
-            $("#truco").html(`Seu oponente trucou: <a onclick="aceitar()">ACEITAR</a> || <a onclick="correr()">CORRER</a>`)
+        socket.on("TrucoPasv", t =>{
+            if(t) $("#truco").html(`Seu oponente trucou: <a onclick="aceitar()">ACEITAR</a> || <a onclick="correr()">CORRER</a>`)
+            else $("#truco").html(`Mão de 10: <a onclick="aceitar()">ACEITAR</a> || <a onclick="correr()">CORRER</a>`)
         });
         function aceitar(){
             $("#truco").html(`<a onclick="truco()">TRUCO</a>`);

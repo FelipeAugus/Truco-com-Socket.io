@@ -1,9 +1,21 @@
 *{ margin: auto; padding: 0px; text-align: center;}
 
-body{background-color:#f94d4db3;}
+body{background-color:#f94d4db3; }
+
+@media only screen and (max-width: 1950px){
+    #truco, #mao, #mesa{max-width:30%;}
+}
+@media only screen and (max-width: 950px){
+    #truco, #mao, #mesa{max-width:45%;}
+}
+@media only screen and (max-width: 750px){
+    #truco, #mao, #mesa{max-width:60%;}
+}
+@media only screen and (max-width: 600px){
+    #truco, #mao, #mesa{max-width:80%;}
+}
 
 #mesa{
-    width:25%;
     margin-top: 30pt;
     background-color: darkgreen;
 
@@ -12,7 +24,7 @@ body{background-color:#f94d4db3;}
     justify-content: center;
     align-items: center
 }
-#mao{width: 25%}
+
 
 .cartas {
     margin: 1%;
@@ -25,16 +37,15 @@ body{background-color:#f94d4db3;}
     width: 100%;
     display: inline-block;
     box-sizing: border-box;
-     
 }
 
 #pontos{
     color: black;
     background-color:#4f3d7a;
-    width: 30%; 
+    width: 90%; 
     height: 40pt;
     display: flex;
     flex-direction:column;
 }
 
-#truco{width:25%;background-color: #25ac25; text-align:center;}
+#truco{background-color: #25ac25; text-align:center;}
