@@ -15,29 +15,32 @@
             
             <button type="submit">JOGAR</button>
         </form>
+        <footer style="position:absolute; bottom:0; font-size: 10px;"><a href="http://www.freepik.com" target="_blank">Imagens disponiveis em: Freepik</a></footer>
     </section>
-    
-    <section id = "game" style="display: none;">
+    <section id="game" style="display: none;">
         <div id="mesa">
-            <div id="rival"></div>
+            <div id="rival" class="cartas"><img src="./Cartas/0.png"></div>
             <div id="pontos" style="float: right;">
                 <div id="ptRiv">Rival: <a>0</a> PTS</div>
+                <div id="sttTruco" style="color: red;"><br></div>
                 <div id="ptMeu">Eu: <a>0</a> PTS</div>
             </div>
-            <div id="minha"></div>
+            <div id="minha" class="cartas"><img src="./Cartas/0.png"></div>
         </div>
 
         <div id="mao">
-            <ul>
-                <li></li>
-                <li></li>
-                <li></li>
-            </ul>
+            <div class="cartas"></div>
+            
+            <div class="cartas"></div>
+
+            <div class="cartas"></div>
         </div>
+
         </br>
-        <div id="truco"><a onclick="truco()">TRUCO</a></div>
-    </section>
-    
+        <div id="truco" style="border:solid 1px;"><a onclick="truco()">TRUCO</a></div>
+        </br>
+        <div id="vez"></div>
+    </section>  
     <script>
         const socket = io(); // io vem da CDN
 
@@ -57,9 +60,7 @@
         // Imprimir mão
         socket.on("cards", J =>{
             for(let x = 0; x<3; x++){
-                let nipe = viraNipe(J.mao[x].nipe);
-                let num = viraReal(J.mao[x].num);
-                $(`li:eq(${x})`).html(`<a onclick="atk(${x})">${num} ${nipe}</a>`);
+                $(`#mao .cartas:eq(${x})`).html(`<a onclick="atk(${x})"><img src="./Cartas/${J.mao[x].num}-${J.mao[x].nipe}.png"></a>`);   
             }
         }); 
         // Jogar carta
@@ -67,32 +68,26 @@
         socket.on("AtkAtiv", c =>{
             if(c == null) return;
             else{
-                if(($(`#minha`)).text() != ''){
-                    $(`#rival`).html('');
+                if(($(`#minha`)).html() != '<img src="./Cartas/0.png">'){
+                    $(`#rival`).html('<img src="./Cartas/0.png">');
                 }
-                $(`li:eq(${c[0]})`).html('');
-                let nipe = viraNipe(c[1].nipe);
-                let num = viraReal(c[1].num);
-                $(`#minha`).html(`${num} ${nipe}`);
+                $(`#mao .cartas:eq(${c[0]})`).html('');
+                $(`#minha`).html(`<img src="./Cartas/${c[1].num}-${c[1].nipe}.png">`);
             }
         });
         socket.on("AtkPasv", c =>{
-            if(($(`#rival`)).text() != ''){
-                $(`#minha`).html('');
+            if(($(`#rival`)).html() != '<img src="./Cartas/0.png">'){
+                $(`#minha`).html('<img src="./Cartas/0.png">');
             }
-            let nipe = viraNipe(c.nipe);
-            let num = viraReal(c.num);
-            $(`#rival`).html(`${num} ${nipe}`);
+            $(`#rival`).html(`<img src="./Cartas/${c.num}-${c.nipe}.png">`);
         }); 
         // Calcular vitória 
         socket.on("win", x =>{
-            $(`#minha`).html('');
-            $(`#rival`).html('');
+            setTimeout(function(){clear();}, 1000);
             $(`#ptMeu a`).html(Number($(`#ptMeu a`).text())+x);
         });
         socket.on("los", x =>{
-            $(`#minha`).html('');
-            $(`#rival`).html('');
+            setTimeout(function(){clear();}, 1000);
             $("#ptRiv a").html(Number($(`#ptRiv a`).text())+x);
         });
         socket.on("winGame", () =>{
@@ -105,8 +100,23 @@
         });
         // TRUCO -> Pedir / Aceitar
         function truco() {socket.emit("TrucoAtiv");}
+        let s;
+        socket.on("SttTruco", t =>{
+            
+            if(t.text!=null) $(`#sttTruco`).html(t.text);
+            if(t.stt){
+                s = setInterval(function(){$(`#sttTruco`).toggle();}, 1000);
+            }else{
+                clearInterval(s);
+                $(`#sttTruco`).html("<br>");
+            }
+            
+
+            
+            
+        });
         socket.on("TrucoPasv", ()=>{
-            $("#truco").html(`SEU OPONENTE TRUCOU: <a onclick="aceitar()">ACEITAR</a> || <a onclick="correr()">CORRER</a>`)
+            $("#truco").html(`Seu oponente trucou: <a onclick="aceitar()">ACEITAR</a> || <a onclick="correr()">CORRER</a>`)
         });
         function aceitar(){
             $("#truco").html(`<a onclick="truco()">TRUCO</a>`);
@@ -116,53 +126,26 @@
             $("#truco").html(`<a onclick="truco()">TRUCO</a>`);
             socket.emit("Correr");
         };
+        
+        // Vez
+        socket.on("vezS", ()=>{
+            $("#vez").html("SUA VEZ !");
+        });
+        socket.on("vezN", v=>{
+            $("#vez").html(`Vez de ${v}!`);
+        });
+
         // Oponente quitou
         socket.on("RivalOff", ()=>{
             alert("SEU OPONENTE DESCONECTOU DA PARTIDA!");
             location.reload(true);
-            //$("section").load("./index.html");
         });
         
         //FUNÇÕES
-        function viraNipe(n) {
-            let nipe;
-            switch (n) {
-                case 1:
-                    nipe = '♠';
-                    break;
-                case 2:
-                    nipe = '❤';
-                    break;
-                case 3:
-                    nipe = '♣';
-                    break;
-                case 4:
-                    nipe = '♦';
-                    break;
-            }
-            return nipe;
+        function clear(){
+                $(`#minha`).html('<img src="./Cartas/0.png">');
+                $(`#rival`).html('<img src="./Cartas/0.png">');
         }
-        function viraReal(n) {
-            let num;
-            switch (n) {
-                case 8:
-                    num = 'Q';
-                    break;
-                case 9:
-                    num = 'J';
-                    break;
-                case 10:
-                    num = 'K';
-                    break;
-                case 1:
-                    num = 'A';
-                    break;
-                default:
-                    num = n
-            }
-            return num;
-        }
-    
     </script>
 </body>
 </html>

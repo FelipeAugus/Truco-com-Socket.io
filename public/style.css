@@ -1,39 +1,40 @@
-*{ margin: auto; padding: 0px;}
+*{ margin: auto; padding: 0px; text-align: center;}
+
+body{background-color:#f94d4db3;}
 
 #mesa{
+    width:25%;
     margin-top: 30pt;
     background-color: darkgreen;
-    width: 200pt;
-    height: 300pt;
+
     display: flex;
     flex-direction:column;
     justify-content: center;
     align-items: center
 }
+#mao{width: 25%}
 
-#mao ul {
-    text-align: center;
-    padding:0px;
-    margin:55px 0px 55px 0px;
-    list-style:none;
-}
-
-#mao ul li { 
-    margin: 5px;
-    padding: 45px;
-    background-color:#f01b1b;
-    display: inline;
+.cartas {
+    margin: 1%;
+    width: 30%;
+    display: inline-block;
+    box-sizing: border-box;
      
 }
-#rival, #minha {font-size: 30px;}
-#rival, #minha, #pontos{
-    color: black;
-    width: 100px;
-    height: 100px;
-    background-color:#4f3d7a;
+.cartas img{
+    width: 100%;
+    display: inline-block;
+    box-sizing: border-box;
+     
 }
-#truco{width:320px;background-color: #25ac25; text-align:center;}
 
-#pontos{display: flex;flex-direction:column;}
+#pontos{
+    color: black;
+    background-color:#4f3d7a;
+    width: 30%; 
+    height: 40pt;
+    display: flex;
+    flex-direction:column;
+}
 
-#truco, #ptMeu, #ptRiv{ border:solid 1px;}
+#truco{width:25%;background-color: #25ac25; text-align:center;}

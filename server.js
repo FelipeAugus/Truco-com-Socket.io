@@ -67,6 +67,7 @@ io.on('connection', socket => {// Identifica conexões
 
             io.to(G.p1.id).emit("cards", G.p1);
             socket.emit("cards", J);
+            vez(G);
         }
     });
     // TRUCO
@@ -90,18 +91,46 @@ io.on('connection', socket => {// Identifica conexões
         }else{
             return;
         }
+        switch (G.rodadaValor) {
+            case 2:
+                t = 'Truco';
+                break;
+            case 4:
+                t = 'Mei saco';
+                break;
+            case 6:
+                t = 'Oito';
+                break;
+            case 8:
+                t = 'É deiz';
+                break;
+            case 6:
+                t = 'Vale o jogo ladrão';
+                break;
+            default:
+                t = 'Chegou no limite já kj';
+        }
 
+
+        io.to(G.p1.id).emit("SttTruco", {stt: true, text: t});
+        io.to(G.p2.id).emit("SttTruco", {stt: true, text: t});
         G.truco = true;
     });
     socket.on("Aceitar", ()=>{
         const G = games.get(usuarios.get(socket.id));
-        
+
+        io.to(G.p1.id).emit("SttTruco", {stt: false, text: null});
+        io.to(G.p2.id).emit("SttTruco", {stt: false, text: null});
+
         G.truco = false;
-        G.rodadaValor*=2;
+        G.rodadaValor+=2;
         G.setvez();
     });
     socket.on("Correr", ()=>{
         const G = games.get(usuarios.get(socket.id));
+
+        io.to(G.p1.id).emit("SttTruco", {stt: false, text: null});
+        io.to(G.p2.id).emit("SttTruco", {stt: false, text: null});
 
         if(G.p1.id == socket.id){
             G.p2.pts += G.rodadaValor;
@@ -148,21 +177,19 @@ io.on('connection', socket => {// Identifica conexões
             let c1 = m1[1]; // carta
             let c2 = m2[1];
 
-            let win;
+            let win = -1;
 
             if(c1.ordem < c2.ordem){
-                win = true;
+                win = 1;
             }else if(c1.ordem > c2.ordem){
-                win = false; 
+                win = 0; 
             }else{
                 G.p1.ptMesa++;
                 G.p2.ptMesa++;
                 G.setvez();
-                G.mesa = [];
-                return;
             }
             
-            if(win){
+            if(win == 1){
                 if(m1[0] == G.p1.id){
                     G.p1.ptMesa++;
                     G.vez = true;
@@ -170,7 +197,7 @@ io.on('connection', socket => {// Identifica conexões
                     G.p2.ptMesa++;
                     G.vez = false;
                 }
-            }else{
+            }else if(win == 0){
                 if(m1[0] == G.p1.id){
                     G.p2.ptMesa++;
                     G.vez = false;                   
@@ -184,6 +211,7 @@ io.on('connection', socket => {// Identifica conexões
         }else{
             G.setvez();
         }
+        
         if ((G.rodada == 3) || ((G.p1.ptMesa >= 2 || G.p2.ptMesa >= 2) && G.p1.ptMesa != G.p2.ptMesa)){
             if(G.p1.ptMesa > G.p2.ptMesa){
                 io.to(G.p1.id).emit("win", G.rodadaValor);
@@ -198,6 +226,7 @@ io.on('connection', socket => {// Identifica conexões
             }
             win (G);
         }
+        vez(G);
     });
     // Disconect
     socket.on("disconnect", () =>{
@@ -206,8 +235,10 @@ io.on('connection', socket => {// Identifica conexões
         const G = games.get(usuarios.get(socket.id));
         if (G == null) return
 
-        if(socket.id == G.p1.id && G.p2 != null){ io.to(G.p2.id).emit("RivalOff"); }
-        else{ io.to(G.p1.id).emit("RivalOff"); }
+        if(socket.id == G.p1.id && G.p2 != null){
+            io.to(G.p2.id).emit("RivalOff"); }
+        else{ 
+            io.to(G.p1.id).emit("RivalOff"); }
 
         if(G.gameCod == codGame[0]){ codGame[1] = 0; }
         G.end(nick, usuarios, games);
@@ -229,6 +260,15 @@ function win(G){
         G.start();
         io.to(G.p1.id).emit("cards", G.p1);
         io.to(G.p2.id).emit("cards", G.p2);
+    }
+}
+function vez(G){
+    if(G.vez){
+        io.to(G.p1.id).emit("vezS");
+        io.to(G.p2.id).emit("vezN", G.p1.nick);
+    }else{
+        io.to(G.p2.id).emit("vezS");
+        io.to(G.p1.id).emit("vezN", G.p2.nick);
     }
 }
 
