@@ -68,7 +68,8 @@
         socket.on("AtkAtiv", c =>{
             if(c == null) return;
             else{
-                if(($(`#minha`)).html() != '<img src="./Cartas/0.png">'){
+                let a = document.getElementById("minha").innerHTML
+                if(a != '<img src="./Cartas/0.png">'){
                     $(`#rival`).html('<img src="./Cartas/0.png">');
                 }
                 $(`#mao .cartas:eq(${c[0]})`).html('');
@@ -76,7 +77,8 @@
             }
         });
         socket.on("AtkPasv", c =>{
-            if(($(`#rival`)).html() != '<img src="./Cartas/0.png">'){
+            let a = document.getElementById("rival").innerHTML
+            if(a != '<img src="./Cartas/0.png">'){
                 $(`#minha`).html('<img src="./Cartas/0.png">');
             }
             $(`#rival`).html(`<img src="./Cartas/${c.num}-${c.nipe}.png">`);

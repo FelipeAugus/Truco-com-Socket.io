@@ -124,7 +124,6 @@ io.on('connection', socket => {// Identifica conexões
 
         G.truco = false;
         G.rodadaValor+=2;
-        console.log("Aceitou: VEZ");
     });
     socket.on("Correr", ()=>{
         const G = games.get(usuarios.get(socket.id));
@@ -224,10 +223,11 @@ io.on('connection', socket => {// Identifica conexões
                 G.p2.pts += G.rodadaValor;
                 
             }
-            win (G);
+            
+            setTimeout(function(){win(G);}, 600);
         }
-        console.log("VEZ");
-        vez(G);
+        
+        setTimeout(function(){vez(G);}, 700);
     });
     // Disconect
     socket.on("disconnect", () =>{
@@ -289,6 +289,7 @@ function win(G){
     }
 }
 function vez(G){
+    
     if(G.vez){
         io.to(G.p1.id).emit("vezS");
         io.to(G.p2.id).emit("vezN", G.p1.nick);
