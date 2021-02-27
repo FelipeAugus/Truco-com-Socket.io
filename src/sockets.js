@@ -1,5 +1,3 @@
-const { io } = require("./app");
-
 const { aceitar } = require("./functions/aceitarFunc");
 const { cardAtk } = require("./functions/cardAtkFunc");
 const { correr } = require("./functions/correrFunc");

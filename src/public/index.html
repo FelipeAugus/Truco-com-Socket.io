@@ -6,14 +6,15 @@
     <title>Truco</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.0/socket.io.js" integrity="sha512-+l9L4lMTFNy3dEglQpprf7jQBhQsQ3/WvOnjaN/+/L4i0jOstgScV0q2TjfvRF4V+ZePMDuZYIQtg5T4MKr+MQ==" crossorigin="anonymous"></script>
+    <script src="./scripts/scripts.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <section id = "log" style="display: flex; margin-top: 100px;">
-        <form id="login">
+        <form id="login" action="submit()">
             <input type="text" name="nick" placeholder="Digite seu nickname" required>
             
-            <button type="submit">JOGAR</button>
+            <button type="submit" >JOGAR</button>
         </form>
         <footer style="position:absolute; bottom:0; font-size: 10px;"><a href="http://www.freepik.com" target="_blank">Imagens disponiveis em: Freepik</a></footer>
     </section>
@@ -42,109 +43,27 @@
         <div id="vez"></div>
     </section>  
     <script>
-        const socket = io(); // io vem da CDN
-
-        // LOGIN
-        $("#login").submit(function(e){
-            e.preventDefault();
-            let usu = $("input[name=nick]").val();
-            socket.emit('username', usu);
-        });
-        socket.on("userOk", usu =>{             
-            $("section:eq(0)").replaceWith($("section:eq(1)").fadeIn());
-            socket.emit('newGame', usu);
-        });
-        socket.on("userNok", ()=>{
-            alert("Nome de usuário indisponivel no momento.");
-        });
+        //LOGIN
+        socket.on("userOk", (usu) => userOk(usu));
+        socket.on("userNok", () => userNok());
         // Imprimir mão
-        socket.on("cards", J =>{
-            for(let x = 0; x<3; x++){
-                $(`#mao .cartas:eq(${x})`).html(`<a onclick="atk(${x})"><img src="./Cartas/${J.mao[x].num}-${J.mao[x].nipe}.png"></a>`);   
-            }
-        }); 
+        socket.on("cards", J =>cards(J)); 
         // Jogar carta
-        function atk(x) { socket.emit("cardAtk", x);}
-        socket.on("AtkAtiv", c =>{
-            if(c == null) return;
-            else{
-                let a = document.getElementById("minha").innerHTML
-                if(a != '<img src="./Cartas/0.png">'){
-                    $(`#rival`).html('<img src="./Cartas/0.png">');
-                }
-                $(`#mao .cartas:eq(${c[0]})`).html('');
-                $(`#minha`).html(`<img src="./Cartas/${c[1].num}-${c[1].nipe}.png">`);
-            }
-        });
-        socket.on("AtkPasv", c =>{
-            let a = document.getElementById("rival").innerHTML
-            if(a != '<img src="./Cartas/0.png">'){
-                $(`#minha`).html('<img src="./Cartas/0.png">');
-            }
-            $(`#rival`).html(`<img src="./Cartas/${c.num}-${c.nipe}.png">`);
-        }); 
+        socket.on("AtkAtiv", (c) => AtkAtiv(c));
+        socket.on("AtkPasv", (c) => AtkPasv(c));
         // Calcular vitória 
-        socket.on("win", x =>{
-            setTimeout(function(){clear();}, 1000);
-            $(`#ptMeu a`).html(Number($(`#ptMeu a`).text())+x);
-        });
-        socket.on("los", x =>{
-            setTimeout(function(){clear();}, 1000);
-            $("#ptRiv a").html(Number($(`#ptRiv a`).text())+x);
-        });
-        socket.on("winGame", () =>{
-            alert("PARABÉNS VOCÊ VENCEU !!!");
-            location.reload(true);
-        });
-        socket.on("losGame", () =>{
-            alert("Você perdeu, mais sorte na próxima !!!");
-            location.reload(true);
-        });
+        socket.on("win", (x) => win(x));
+        socket.on("los", (x) => los(x));
+        socket.on("winGame", () => winGame());
+        socket.on("losGame", () => losGame());
         // TRUCO -> Pedir / Aceitar
-        function truco() {socket.emit("TrucoAtiv");}
-        let s;
-        socket.on("SttTruco", t =>{
-            if(t.text!=null) $(`#sttTruco`).html(t.text);
-            if(t.stt && t.stt!=57){
-                s = setInterval(function(){$(`#sttTruco`).toggle();}, 1000);
-            }else{
-                clearInterval(s);
-                $(`#sttTruco`).html("<br>");
-            }  
-            if(t.stt == 57) $(`#sttTruco`).html(t.text);
-        });
-        socket.on("TrucoPasv", t =>{
-            if(t) $("#truco").html(`Seu oponente trucou: <a onclick="aceitar()">ACEITAR</a> || <a onclick="correr()">CORRER</a>`)
-            else $("#truco").html(`Mão de 10: <a onclick="aceitar()">ACEITAR</a> || <a onclick="correr()">CORRER</a>`)
-        });
-        function aceitar(){
-            $("#truco").html(`<a onclick="truco()">TRUCO</a>`);
-            socket.emit("Aceitar");
-        };
-        function correr(){
-            $("#truco").html(`<a onclick="truco()">TRUCO</a>`);
-            socket.emit("Correr");
-        };
-        
+        socket.on("SttTruco", (t) => SttTruco(t));
+        socket.on("TrucoPasv", (t) => TrucoPasv(t));
         // Vez
-        socket.on("vezS", ()=>{
-            $("#vez").html("SUA VEZ !");
-        });
-        socket.on("vezN", v=>{
-            $("#vez").html(`Vez de ${v}!`);
-        });
-
+        socket.on("vezS", () => vezS());
+        socket.on("vezN", (v) => vezN(v));
         // Oponente quitou
-        socket.on("RivalOff", ()=>{
-            alert("SEU OPONENTE DESCONECTOU DA PARTIDA!");
-            location.reload(true);
-        });
-        
-        //FUNÇÕES
-        function clear(){
-                $(`#minha`).html('<img src="./Cartas/0.png">');
-                $(`#rival`).html('<img src="./Cartas/0.png">');
-        }
+        socket.on("RivalOff", () =>RivalOff());
     </script>
 </body>
 </html>
